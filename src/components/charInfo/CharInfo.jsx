@@ -1,99 +1,67 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Skeleton from '../skeleton/Skeleton';
 import './charInfo.scss';
 
-class CharInfo extends Component {
+const CharInfo = (props) => {
 
-    state = { // начальный state
-        char: null,
-        loading: false,
-        error: false
-    }
+    const [char, setChar] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
 
-    marvelService = new MarvelService();
+    const marvelService = new MarvelService();
 
-    componentDidMount() { // для отрисовки первый раз
-        this.updateChar();
-    }
+    useEffect(() => { // эмуляция componentDidMount
+        updateChar(); // получение данных (случайный char по id)
+    }, [props.charId])
 
-    componentDidUpdate(prevProps, prevState) { // для обновления state
-        if (this.props.charId !== prevProps.charId) { // если новые пропсы не равны старым
-            this.updateChar();
-        }
-    }
-
-    updateChar = () => { // обновляем state новым id
-        const { charId } = this.props
+    const updateChar = () => { // обновляем state новым id
+        const { charId } = props
         if (!charId) {
             return;
         }
 
-        this.onCharLoading(); // спиннер для видимость обновления
-        this.marvelService // получение данных
+        onCharLoading(); // spinner для видимость обновления
+        marvelService // получение данных
             .getCharacter(charId)
-            .then(this.onCharLoaded)
-            .catch(this.onError)
+            .then(onCharLoaded)
+            .catch(onError)
     }
 
-    onCharLoaded = (char) => { // загрузка персонажа
-        console.log('update');
-        this.setState({ //текущий state
-            char, // новый state (объект)
-            loading: false, // удаляем индикатор загрузки
-        })
+    const onCharLoaded = (char) => { // загрузка char
+        setLoading(false);
+        setChar(char);
     }
 
-    onCharLoading = () => { // функция отрисовки индикатора загрузки
-        this.setState({ // старый state
-            loading: true, // новый state
-            error: false
-        })
+    const onCharLoading = () => { // функция отрисовки spinner
+        setLoading(true);
+        setError(false);
     }
 
-    onError = () => { // функция отрисовки error заглушки
-        this.setState({ // старый state
-            loading: false, // новый state
-            error: true
-        })
+    const onError = () => { // функция отрисовки error заглушки
+        setError(true);
+        setLoading(false);
     }
 
-    render() {
-        const { char, loading, error } = this.state;
+    const skeleton = char || loading || error ? null : <Skeleton />;
+    const errorMessage = error ? <ErrorMessage /> : null; //если не ошибка - null
+    const spinner = loading ? <Spinner /> : null; // если не загрузка - null
+    const content = !(errorMessage || spinner || !char) ? <View char={char} /> : null; // если не ошибка и не загрузка - контент : null
 
-        const skeleton = char || loading || error ? null : <Skeleton />;
-        const errorMessage = error ? <ErrorMessage /> : null; //если не ошибка - null
-        const spinner = loading ? <Spinner /> : null; // если не загрузка - null
-        const content = !(errorMessage || spinner || !char) ? <View char={char} /> : null; // если не ошибка и не загрузка - контент : null
-
-        return (
-            <div className="char__info">
-                {skeleton}
-                {errorMessage}
-                {spinner}
-                {content}
-            </div>
-        )
-    }
+    return (
+        <div className="char__info">
+            {skeleton}
+            {errorMessage}
+            {spinner}
+            {content}
+        </div>
+    )
 }
 
 const View = ({ char }) => {
     const { name, description, thumbnail, homepage, wiki, comics } = char;
-
-    const element = comics.map((item, index) => {
-        // eslint-disable-next-line array-callback-return
-        if (index > 9) return;
-        return (
-            < li key={index} className="char__comics-item" >
-                {item.name}
-            </li>
-        );
-    })
-
-    const empty = !element.length ? ' is not found' : null;
-
 
     let baseImgStyle = { 'objectFit': 'cover' };
     if (thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
@@ -120,8 +88,18 @@ const View = ({ char }) => {
             </div>
             <div className="char__comics">Comics:</div>
             <ul className="char__comics-list">
-                {empty}
-                {element}
+                {comics.length > 0 ? null : 'There is no comics with this character'}
+                {
+                    comics.map((item, index) => {
+                        // eslint-disable-next-line array-callback-return
+                        if (index > 9) return;
+                        return (
+                            < li key={index} className="char__comics-item" >
+                                {item.name}
+                            </li>
+                        );
+                    })
+                }
             </ul>
         </>
     )
