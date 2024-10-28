@@ -4,6 +4,8 @@ import RandomChar from "./components/randomChar/RandomChar";
 import CharList from "./components/charList/CharList";
 import CharInfo from "./components/charInfo/CharInfo";
 import ErrorBoundary from "./errorBoundary/ErrorBoundary";
+import Banner from "./components/banner/Banner";
+import ComicsList from "./components/comicsList/ComicsList";
 
 import decoration from "./resources/img/vision.png"
 
@@ -19,18 +21,20 @@ const App = () => {
 		<div className="app">
 			<Header />
 			<main>
-				<ErrorBoundary>
+				<Banner />
+				<ComicsList />
+				{/* <ErrorBoundary>
 					<RandomChar />
 				</ErrorBoundary>
 				<div className="char__content">
 					<ErrorBoundary>
-						<CharList onCharSelected={onCharSelected} /> {/*получаем id шз списка*/}
+						<CharList onCharSelected={onCharSelected} />
 					</ErrorBoundary>
 					<ErrorBoundary>
-						<CharInfo charId={selectedChar} /> {/* передаем полученный id в info */}
+						<CharInfo charId={selectedChar} />
 					</ErrorBoundary>
 				</div>
-				<img className="bg-decoration" src={decoration} alt="vision" />
+				<img className="bg-decoration" src={decoration} alt="vision" /> */}
 			</main>
 		</div>
 	);

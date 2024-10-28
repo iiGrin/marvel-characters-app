@@ -1,0 +1,8 @@
+.comics {
+    display: grid;
+    grid-template-columns: repeat(4, 225px);
+    grid-template-rows: 346px;
+    justify-content: space-between;
+    row-gap: 55px;
+    margin-top: 55px;
+}

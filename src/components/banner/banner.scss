@@ -1,0 +1,15 @@
+@import '../../styles/variables.scss';
+
+.banner {
+    display: grid;
+    grid-template-columns: 152px auto 133px;
+    background-color: $dark;
+    padding: 0 25px 0 45px;
+
+    &__title {
+        margin: 18px 83px 18px;
+        font-weight: 700;
+        line-height: 32px;
+        color: #fff
+    }
+}
