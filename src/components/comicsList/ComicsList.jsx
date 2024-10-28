@@ -51,7 +51,7 @@ const ComicsList = (props) => {
         })
 
         return (
-            <ul>
+            <ul className='comics__list'>
                 {items}
             </ul>
         )
@@ -62,7 +62,7 @@ const ComicsList = (props) => {
     const spinner = loading && !newItemLoading ? <Spinner /> : null;
 
     return (
-        <div className='comics__list'>
+        <div className='comics'>
             {errorMessage}
             {spinner}
             {items}
