@@ -1,30 +1,34 @@
-class MarvelService {
+import { useHttp } from "../hooks/http.hook";
 
-    _apiBase = 'https://gateway.marvel.com:443/v1/public/'; // неизменные свойства   
-    _apiKey = 'apikey=46266c05cc60286736867e707160a8e9';
-    _baseOffset = 210;
+const useMarvelService = () => {
 
-    getResource = async (url) => { // получаем данные и конвертируем в json 
-        let res = await fetch(url);
+    const { loading, request, error, clearError } = useHttp();
 
-        if (!res.ok) {
-            throw new Error(`Couldn't fetch ${url}, status: ${res.status}`);
-        }
+    const _apiBase = 'https://gateway.marvel.com:443/v1/public/'; // неизменные свойства   
+    const _apiKey = 'apikey=46266c05cc60286736867e707160a8e9';
+    const _baseOffset = 210;
 
-        return await res.json();
+    // getResource = async (url) => { // получаем данные и конвертируем в json 
+    //     let res = await fetch(url);
+
+    //     if (!res.ok) {
+    //         throw new Error(`Couldn't fetch ${url}, status: ${res.status}`);
+    //     }
+
+    //     return await res.json();
+    // }
+
+    const getAllCharacters = async (offset = _baseOffset) => { // гибкая передача (по умолчанию будет 210, при изменении будет меняться сам аргумент при интерполяции)
+        const res = await request(`${_apiBase}characters?limit=9&offset=${offset}&${_apiKey}`); // получение всех char
+        return res.data.results.map(_transformCharacter);
     }
 
-    getAllCharacters = async (offset = this._baseOffset) => { // гибкая передача (по умолчанию будет 210, при изменении будет меняться сам аргумент при интерполяции)
-        const res = await this.getResource(`${this._apiBase}characters?limit=9&offset=${offset}&${this._apiKey}`); // получение всех char
-        return res.data.results.map(this._transformCharacter);
+    const getCharacter = async (id) => {
+        const res = await request(`${_apiBase}characters/${id}?${_apiKey}`); // получение случайного char
+        return _transformCharacter(res.data.results[0]);
     }
 
-    getCharacter = async (id) => {
-        const res = await this.getResource(`${this._apiBase}characters/${id}?${this._apiKey}`); // получение случайного char
-        return this._transformCharacter(res.data.results[0]);
-    }
-
-    _transformCharacter = (char) => {
+    const _transformCharacter = (char) => {
 
         return { // отрисовка char по данным json 
             id: char.id,
@@ -36,6 +40,8 @@ class MarvelService {
             comics: char.comics.items
         }
     }
+
+    return { loading, error, getAllCharacters, getCharacter, clearError };
 }
 
-export default MarvelService;
+export default useMarvelService;

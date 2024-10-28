@@ -1,33 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import './charList.scss';
 
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
 
-    const marvelService = new MarvelService();
+    const { loading, error, getAllCharacters } = useMarvelService(); // полученные данные вместе со spinner и гифкой ошибки
 
     useEffect(() => { // эмуляция componentDidMount 
-        onRequest(); // функция может запуститься выше ее объявления потому что useEffect запускается после рендера компонента
+        onRequest(offset, true); // функция может запуститься выше ее объявления потому что useEffect запускается после рендера компонента
     }, [])
 
-    const onRequest = (offset) => { // запрос новых char в list
-        onCharListLoading();
-        marvelService.getAllCharacters(offset) // получение данных
+    const onRequest = (offset, initial) => { // запрос новых char в list
+        initial ? setNewItemLoading(false) : setNewItemLoading(true);
+        getAllCharacters(offset) // получение данных
             .then(onCharListLoaded) // данные загружены (список объектов получен, индикатор загрузки удален)
-            .catch(onError) // рендер ошибки при неуспешном запросе
-    }
-
-    const onCharListLoading = () => {
-        setNewItemLoading(true);
     }
 
     const onCharListLoaded = (newCharList) => { // загрузка массива объектов
@@ -37,15 +30,9 @@ const CharList = (props) => {
         }
 
         setCharList(charList => [...charList, ...newCharList]); // новый state (массив объектов)
-        setLoading(loading => false);
         setNewItemLoading(newItemLoading => false);
         setOffset(offset => offset + 9);
         setCharEnded(charEnded => ended);
-    }
-
-    const onError = () => { // функция отрисовки error заглушки
-        setLoading(false);
-        setError(true);
     }
 
     const itemRefs = useRef([]);
@@ -94,14 +81,13 @@ const CharList = (props) => {
 
     const items = renderItems(charList)
     const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error) ? items : null;
+    const spinner = loading && !newItemLoading ? <Spinner /> : null;
 
     return (
         <div className="char__list">
             {errorMessage}
             {spinner}
-            {content}
+            {items}
             <button
                 disabled={newItemLoading}
                 style={{ 'display': charEnded ? 'none' : 'block' }}

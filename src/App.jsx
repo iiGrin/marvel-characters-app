@@ -24,7 +24,7 @@ const App = () => {
 				</ErrorBoundary>
 				<div className="char__content">
 					<ErrorBoundary>
-						<CharList onCharSelected={onCharSelected} /> {/* получаем id шз списка */}
+						<CharList onCharSelected={onCharSelected} /> {/*получаем id шз списка*/}
 					</ErrorBoundary>
 					<ErrorBoundary>
 						<CharInfo charId={selectedChar} /> {/* передаем полученный id в info */}

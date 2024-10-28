@@ -1,18 +1,15 @@
 import { useState, useEffect } from 'react';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 
 const RandomChar = () => {
 
-    const [char, setChar] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-
-    const marvelService = new MarvelService();
+    const [char, setChar] = useState({});
+    const { loading, error, getCharacter, clearError } = useMarvelService();
 
     useEffect(() => { // эмуляция componentDidMount
         updateChar(); // получение данных (случайный char по id)
@@ -20,32 +17,21 @@ const RandomChar = () => {
 
 
     const onCharLoaded = (char) => { // загрузка char
-        setLoading(false)
         setChar(char); // новый state (объект)
     }
 
-    const onCharLoading = () => { // функция отрисовки spinner
-        setLoading(true);
-        setError(false);
-    }
 
-    const onError = () => { // функция отрисовки error
-        setLoading(false);
-        setError(true);
-    }
 
     const updateChar = () => { // получение объекта случайного char
+        clearError();
         const id = Math.floor(Math.random() * (1010789 - 1009146) + 1009146); // случайный id
-        onCharLoading(); // отрисовка spinner
-        marvelService // экземпляр класса
-            .getCharacter(id) // получение данных по случайному id
-            .then(onCharLoaded) // (успех) замена старого state на новый 
-            .catch(onError) // (ошибка) замена старого state на error 
+        getCharacter(id) // получение данных по случайному id
+            .then(onCharLoaded); // (успех) замена старого state на новый 
     }
 
     const errorMessage = error ? <ErrorMessage /> : null; //если не ошибка - null
     const spinner = loading ? <Spinner /> : null; // если не загрузка - null
-    const content = !(errorMessage || spinner) ? <View char={char} /> : null; // если не ошибка и не загрузка - контент : null
+    const content = !(loading || error || !char) ? <View char={char} /> : null; // если не ошибка и не загрузка - контент : null
     // добавление компонент в верстку
     return (
         <div className="randomchar">
