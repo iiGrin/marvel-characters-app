@@ -1,0 +1,39 @@
+@import '../../styles/variables.scss';
+
+.comic {
+    display: grid;
+    grid-template-columns: 293px auto 76px;
+    margin-top: 50px;
+    font-size: 18px;
+    line-height: 21px;
+
+    &__img {
+        height: 450px;
+    }
+
+    &__info {
+        display: flex;
+        flex-direction: column;
+        row-gap: 25px;
+        margin-left: 50px;
+        padding-right: 131px;
+
+        &-title {
+            font-size: 22px;
+            line-height: 26px;
+            font-weight: 700;
+        }
+
+        &-price {
+            font-size: 24px;
+            line-height: 28px;
+            font-weight: 700;
+            color: $main-color;
+        }
+    }
+
+    &__back {
+        height: 21px;
+        font-weight: 700;
+    }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -79,8 +80,12 @@ const View = ({ char }) => {
                         // eslint-disable-next-line array-callback-return
                         if (index > 9) return;
                         return (
-                            < li key={index} className="char__comics-item" >
-                                {item.name}
+                            <li
+                                key={index}
+                                className="char__comics-item" >
+                                <Link to={`/comics/${item["resourceURI"].replace(/[\D]/g, '')}`}>
+                                    {item.name}
+                                </Link>
                             </li>
                         );
                     })
