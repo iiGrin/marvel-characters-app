@@ -1,9 +1,14 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Header from "./components/header/Header";
-import MainPage from "./components/pages/MainPage";
-import ComicsPage from "./components/pages/ComicsPage";
-import ComicInfoPage from "./components/pages/ComicInfoPage";
-import Page404 from "./components/pages/404";
+import Spinner from "./components/spinner/Spinner";
+
+const Page404 = lazy(() => import('./components/pages/404'));
+const MainPage = lazy(() => import('./components/pages/MainPage'));
+const ComicsPage = lazy(() => import('./components/pages/ComicsPage'));
+const ComicInfoPage = lazy(() => import('./components/pages/ComicInfoPage'));
+
+
 
 const App = () => {
 
@@ -14,12 +19,14 @@ const App = () => {
 			<div className="app">
 				<Header />
 				<main>
-					<Routes>
-						<Route path='/' element={<MainPage />} /> {/* main page */}
-						<Route path="/comics" element={<ComicsPage />} />
-						<Route path="/comics/:comicId" element={<ComicInfoPage />} />
-						<Route path='*' element={<Page404 />} /> {/* Компонент для несуществующей страницы */}
-					</Routes>
+					<Suspense fallback={<Spinner />}>
+						<Routes>
+							<Route path='/' element={<MainPage />} /> {/* main page */}
+							<Route path="/comics" element={<ComicsPage />} />
+							<Route path="/comics/:comicId" element={<ComicInfoPage />} />
+							<Route path='*' element={<Page404 />} /> {/* Компонент для несуществующей страницы */}
+						</Routes>
+					</Suspense>
 				</main>
 			</div>
 		</Router>
