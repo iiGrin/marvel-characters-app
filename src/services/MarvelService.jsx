@@ -18,7 +18,8 @@ const useMarvelService = () => {
     //     return await res.json();
     // }
 
-    const getAllCharacters = async (offset = _baseOffset) => { // гибкая передача (по умолчанию будет 210, при изменении будет меняться сам аргумент при интерполяции)
+    // гибкая передача (по умолчанию будет 210, при изменении будет меняться сам аргумент при интерполяции)
+    const getAllCharacters = async (offset = _baseOffset) => {
         const res = await request(`${_apiBase}characters?limit=9&offset=${offset}&${_apiKey}`); // получение всех char
         return res.data.results.map(_transformCharacter);
     }
@@ -35,7 +36,7 @@ const useMarvelService = () => {
 
     const getComic = async (id) => {
         const res = await request(`${_apiBase}comics/${id}?${_apiKey}`);
-        return _transformComics(res.data.results[0]); 
+        return _transformComics(res.data.results[0]);
     }
 
     const _transformCharacter = (char) => {
@@ -43,7 +44,8 @@ const useMarvelService = () => {
         return { // отрисовка char по данным json 
             id: char.id,
             name: char.name,
-            description: char.description ? `${char.description.slice(0, 210)}...` : 'Description is not found', // если в json нет данных  
+            // если в json нет данных
+            description: char.description ? `${char.description.slice(0, 210)}...` : 'Description is not found',
             thumbnail: char.thumbnail.path + '.' + char.thumbnail.extension,
             homepage: char.urls[0].url,
             wiki: char.urls[1].url,

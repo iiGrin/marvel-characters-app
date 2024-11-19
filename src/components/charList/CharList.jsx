@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Transition, TransitionGroup } from 'react-transition-group';
 import PropTypes from 'prop-types';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -11,6 +12,7 @@ const CharList = (props) => {
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
+    const [animation, setAnimation] = useState(false);
 
     const { loading, error, getAllCharacters } = useMarvelService(); // полученные данные вместе со spinner и гифкой ошибки
 
@@ -24,16 +26,17 @@ const CharList = (props) => {
             .then(onCharListLoaded) // данные загружены (список объектов получен, индикатор загрузки удален)
     }
 
-    const onCharListLoaded = (newCharList) => { // загрузка массива объектов
+    const onCharListLoaded = async (newCharList) => { // загрузка массива объектов
         let ended = false;
         if (newCharList.length < 9) {
             ended = true;
         }
 
-        setCharList(charList => [...charList, ...newCharList]); // новый state (массив объектов)
-        setNewItemLoading(newItemLoading => false);
-        setOffset(offset => offset + 9);
-        setCharEnded(charEnded => ended);
+        setCharList([...charList, ...newCharList]); // новый state (массив объектов)
+        setAnimation(true);
+        setNewItemLoading(false);
+        setOffset(offset + 9);
+        setCharEnded(ended);
     }
 
     const itemRefs = useRef([]);
@@ -45,37 +48,76 @@ const CharList = (props) => {
         itemRefs.current[id].focus();
     }
 
+    const nodeRef = useRef(null);
+
     function renderItems(arr) { // функция отрисовки массива объектов
+        let delay = 0;
         const items = arr.map((item, i) => { // новый массив (каждый item )
             let imgStyle = { 'objectFit': 'cover' }; // если картинка заглушка
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
                 imgStyle = { 'objectFit': 'unset' };
             }
+
+            const duration = 400;
+
+            const defaultStyle = { // стили по умолчанию 
+                transition: `opacity ${duration}ms ease-in-out`,
+                opacity: 0,
+                transform: "translateY(-30%)",
+                transitionDelay: `${delay}s`
+            }
+
+            const transitionStyles = {
+                entering: { opacity: 0, transform: 'translateY(-30%)', transitionDelay: `${delay}s` },
+                entered: { opacity: 1, transform: 'translateY(0)', transitionDelay: `${delay}s` },
+                exiting: { opacity: 1, transform: 'translateY(0)', transitionDelay: `${delay}s` },
+                exited: { opacity: 0, transform: 'translateY(30%)', transitionDelay: `${delay}s` },
+            };
+
+            if (i >= arr.length - 9) {
+                delay += 0.1;
+            };
+
             return ( // верстка для каждого полученного объекта (результат map функции)
-                <li
-                    className="char__item"
-                    tabIndex={0}
-                    ref={el => itemRefs.current[i] = el}
+                <Transition
                     key={item.id}
-                    onClick={() => {
-                        props.onCharSelected(item.id);
-                        focusOnItem(i);
-                    }}
-                    onKeyPress={(e) => {
-                        if (e.key === ' ' || e.key === "Enter") {
-                            props.onCharSelected(item.id);
-                            focusOnItem(i);
-                        }
-                    }}> {/* получаем id по функции из app.js */}
-                    <img style={imgStyle} src={item.thumbnail} alt={item.name} />
-                    <div className="char__name">{item.name}</div>
-                </li>
+                    timeout={duration}
+                    in={animation}
+                    nodeRef={nodeRef}
+                    mountOnEnter
+                    unmountOnExit>
+                    {state => (
+                        <li
+                            style={{
+                                ...defaultStyle,
+                                ...transitionStyles[state]
+                            }}
+                            className="char__item"
+                            tabIndex={0}
+                            ref={el => itemRefs.current[i] = el}
+                            onClick={() => {
+                                props.onCharSelected(item.id);
+                                focusOnItem(i);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === ' ' || e.key === "Enter") {
+                                    props.onCharSelected(item.id);
+                                    focusOnItem(i);
+                                }
+                            }}> {/* получаем id по функции из app.js */}
+                            <img style={imgStyle} src={item.thumbnail} alt={item.name} />
+                            <div className="char__name">{item.name}</div>
+                        </li>
+                    )}
+                </Transition>
             )
         });
 
         return ( // результат предыдущей колл-бэк функции (items(return)) помещаем в результат renderItems
-            <ul className="char__grid">
-                {items}
+            <ul className={"char__grid"}>
+                <TransitionGroup component={null}>
+                    {items}
+                </TransitionGroup>
             </ul>
         )
     }
