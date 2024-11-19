@@ -18,6 +18,7 @@ const CharList = (props) => {
 
     useEffect(() => { // эмуляция componentDidMount 
         onRequest(offset, true); // функция может запуститься выше ее объявления потому что useEffect запускается после рендера компонента
+    // eslint-disable-next-line
     }, [])
 
     const onRequest = (offset, initial) => { // запрос новых char в list

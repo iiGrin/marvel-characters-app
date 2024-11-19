@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import useMarvelService from '../../services/MarvelService';
 
 import './comicsList.scss';
+import { Transition, TransitionGroup } from 'react-transition-group';
 
 const ComicsList = (props) => {
 
@@ -25,7 +26,7 @@ const ComicsList = (props) => {
             .then(onComicsListLoaded)
     }
 
-    const onComicsListLoaded = (newComicsList) => {
+    const onComicsListLoaded = async (newComicsList) => {
         let ended = false;
         if (newComicsList.length < 8) {
             ended = true;
@@ -37,24 +38,49 @@ const ComicsList = (props) => {
         setComicsEnded(comicsEnded => ended);
     }
 
+    const nodeRef = useRef(null);
+
     function renderItems(arr) {
         const items = arr.map((item, i) => {
+
+            const defaultStyle = {
+                transition: `opacity 300ms ease-in-out ${i%8 * 0.18}s, transform 300ms ease-in-out`,
+                opacity: 0,
+            };
+            const transitionStyles = {
+                entering: { opacity: 0 },
+                entered: { opacity: 1},
+                exiting: { opacity: 0 },
+                exited: { opacity: 0 },
+            };
+
             return (
-                <li
-                    className='comics__list__item'
-                    key={i}
-                    tabIndex={0}>
-                    <Link to={`/comics/${item.id}`}>
-                        <img className='comics__list__item-img' src={item.thumbnail} alt={item.title} />
-                        <h3 className="comics__list__item-title">{item.title}</h3>
-                        <span className="comics__list__item-price">{item.price}</span></Link>
-                </li>
+                <Transition key={i} timeout={600} nodeRef={nodeRef}>
+                    {state => (
+                        <li
+                        style={{
+                            ...defaultStyle,
+                            ...transitionStyles[state]
+                        }}
+                        className='comics__list__item'
+                        key={i}
+                        tabIndex={0}>
+                        <Link to={`/comics/${item.id}`}>
+                                <img className='comics__list__item-img' src={item.thumbnail} alt={item.title} />
+                                <h3 className="comics__list__item-title">{item.title}</h3>
+                                <span className="comics__list__item-price">{item.price}</span>
+                            </Link>
+                        </li>
+                    )}
+                </Transition>
             )
         })
 
         return (
             <ul className='comics__list'>
-                {items}
+                <TransitionGroup component={null}>
+                    {items}
+                </TransitionGroup>
             </ul>
         )
     }
