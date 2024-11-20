@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Transition } from 'react-transition-group';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import useMarvelService from '../../services/MarvelService';
@@ -10,20 +11,22 @@ const RandomChar = () => {
 
     const [char, setChar] = useState({});
     const { loading, error, getCharacter, clearError } = useMarvelService();
+    const [inProp, setInProp] = useState(false);
 
     useEffect(() => { // эмуляция componentDidMount
         updateChar(); // получение данных (случайный char по id)
+        // eslint-disable-next-line
     }, [])
 
 
     const onCharLoaded = (char) => { // загрузка char
         setChar(char); // новый state (объект)
+        setInProp(true);
     }
-
-
 
     const updateChar = () => { // получение объекта случайного char
         clearError();
+        setInProp(false);
         const id = Math.floor(Math.random() * (1010789 - 1009146) + 1009146); // случайный id
         getCharacter(id) // получение данных по случайному id
             .then(onCharLoaded); // (успех) замена старого state на новый 
@@ -34,24 +37,27 @@ const RandomChar = () => {
     const content = !(loading || error || !char) ? <View char={char} /> : null; // если не ошибка и не загрузка - контент : null
     // добавление компонент в верстку
     return (
-        <div className="randomchar">
-            {errorMessage}
-            {spinner}
-            {content}
-            <div className="randomchar__static">
-                <p className="randomchar__title">
-                    Random character for today!<br />
-                    Do you want to get to know him better?
-                </p>
-                <p className="randomchar__title">
-                    Or choose another one
-                </p>
-                <button onClick={updateChar} className="button button__main">
-                    <div className="inner">try it</div>
-                </button>
-                <img src={mjolnir} alt="mjolnir" className="randomchar__decoration" />
+        <>
+            <div className="randomchar">
+                {errorMessage}
+                {spinner}
+                {content}
+
+                <div className="randomchar__static">
+                    <p className="randomchar__title">
+                        Random character for today!<br />
+                        Do you want to get to know him better?
+                    </p>
+                    <p className="randomchar__title">
+                        Or choose another one
+                    </p>
+                    <button onClick={updateChar} className="button button__main">
+                        <div className="inner">try it</div>
+                    </button>
+                    <img src={mjolnir} alt="mjolnir" className="randomchar__decoration" />
+                </div>
             </div>
-        </div>
+        </>
     )
 }
 

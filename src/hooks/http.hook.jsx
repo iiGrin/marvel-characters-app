@@ -5,7 +5,7 @@ export const useHttp = () => {
     const [error, setError] = useState(null);
 
     const request = // запрос char на сервер
-        useCallback(async (url, method = 'GET', body = null, headers = { 'Content-Type': 'application/json' }) => {
+        useCallback(async (url, method = 'GET', body = null, headers = { 'Content-Type': 'application/json utf-8' }) => {
 
             setLoading(true); // отрисовка spinner
 

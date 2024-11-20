@@ -14,6 +14,7 @@ const CharInfo = (props) => {
 
     useEffect(() => { // эмуляция componentDidMount
         updateChar(); // получение данных (случайный char по id)
+        // eslint-disable-next-line
     }, [props.charId])
 
     const updateChar = () => { // обновляем state новым id
@@ -23,11 +24,11 @@ const CharInfo = (props) => {
             return;
         }
 
-        getCharacter(charId)
+        getCharacter(charId) // обновляем char в charInfo
             .then(onCharLoaded)
     }
 
-    const onCharLoaded = (char) => { // загрузка char
+    const onCharLoaded = (char) => { // загрузка char в charInfo
         setChar(char);
     }
 
@@ -53,6 +54,7 @@ const View = ({ char }) => {
     if (thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
         baseImgStyle = { 'objectFit': 'contain' };
     }
+
     return (
         <>
             <div className="char__basics">
@@ -83,7 +85,7 @@ const View = ({ char }) => {
                             <li
                                 key={index}
                                 className="char__comics-item" >
-                                <Link to={`/comics/${item["resourceURI"].replace(/[\D]/g, '')}`}>
+                                <Link to={`/comics/${item["resourceURI"].split('/').at(-1)}`}>
                                     {item.name}
                                 </Link>
                             </li>

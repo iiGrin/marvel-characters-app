@@ -12,8 +12,6 @@ const ComicInfoPage = lazy(() => import('./components/pages/ComicInfoPage'));
 
 const App = () => {
 
-
-
 	return (
 		<Router>
 			<div className="app">
@@ -36,6 +34,7 @@ const App = () => {
 export default App;
 
 /* TASKS
-	- появление карточек с анимацией
+https://marvel-rtg.vercel.app/comics
+	- появление карточек с анимацией(оптимизация одной функцией)
 	- плавное переключение по путям 
 */ 

@@ -12,13 +12,13 @@ const CharList = (props) => {
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
-    const [animation, setAnimation] = useState(false);
+    // const [animation, setAnimation] = useState(false);
 
     const { loading, error, getAllCharacters } = useMarvelService(); // полученные данные вместе со spinner и гифкой ошибки
 
     useEffect(() => { // эмуляция componentDidMount 
         onRequest(offset, true); // функция может запуститься выше ее объявления потому что useEffect запускается после рендера компонента
-    // eslint-disable-next-line
+        // eslint-disable-next-line
     }, [])
 
     const onRequest = (offset, initial) => { // запрос новых char в list
@@ -34,13 +34,14 @@ const CharList = (props) => {
         }
 
         setCharList([...charList, ...newCharList]); // новый state (массив объектов)
-        setAnimation(true);
+        // setAnimation(true);
         setNewItemLoading(false);
         setOffset(offset + 9);
         setCharEnded(ended);
     }
 
     const itemRefs = useRef([]);
+    const nodeRef = useRef(null);
 
     // Ref 
     const focusOnItem = (id) => {
@@ -49,41 +50,31 @@ const CharList = (props) => {
         itemRefs.current[id].focus();
     }
 
-    const nodeRef = useRef(null);
-
     function renderItems(arr) { // функция отрисовки массива объектов
-        let delay = 0;
+        // let delay = 0;
         const items = arr.map((item, i) => { // новый массив (каждый item )
             let imgStyle = { 'objectFit': 'cover' }; // если картинка заглушка
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
                 imgStyle = { 'objectFit': 'unset' };
             }
 
-            const duration = 400;
-
-            const defaultStyle = { // стили по умолчанию 
-                transition: `opacity ${duration}ms ease-in-out`,
+            const defaultStyle = {
+                transition: `opacity 300ms ease-in-out ${i % 9 * 0.18}s, transform 300ms ease-in-out`,
                 opacity: 0,
-                transform: "translateY(-30%)",
-                transitionDelay: `${delay}s`
-            }
-
+            };
             const transitionStyles = {
-                entering: { opacity: 0, transform: 'translateY(-30%)', transitionDelay: `${delay}s` },
-                entered: { opacity: 1, transform: 'translateY(0)', transitionDelay: `${delay}s` },
-                exiting: { opacity: 1, transform: 'translateY(0)', transitionDelay: `${delay}s` },
-                exited: { opacity: 0, transform: 'translateY(30%)', transitionDelay: `${delay}s` },
+                entering: { opacity: 0 },
+                entered: { opacity: 1 },
+                exiting: { opacity: 0 },
+                exited: { opacity: 0 },
             };
 
-            if (i >= arr.length - 9) {
-                delay += 0.1;
-            };
+            const { id, name, thumbnail } = item;
 
             return ( // верстка для каждого полученного объекта (результат map функции)
                 <Transition
-                    key={item.id}
-                    timeout={duration}
-                    in={animation}
+                    key={id}
+                    timeout={600}
                     nodeRef={nodeRef}
                     mountOnEnter
                     unmountOnExit>
@@ -97,17 +88,17 @@ const CharList = (props) => {
                             tabIndex={0}
                             ref={el => itemRefs.current[i] = el}
                             onClick={() => {
-                                props.onCharSelected(item.id);
+                                props.onCharSelected(id);
                                 focusOnItem(i);
                             }}
                             onKeyDown={(e) => {
                                 if (e.key === ' ' || e.key === "Enter") {
-                                    props.onCharSelected(item.id);
+                                    props.onCharSelected(id);
                                     focusOnItem(i);
                                 }
                             }}> {/* получаем id по функции из app.js */}
-                            <img style={imgStyle} src={item.thumbnail} alt={item.name} />
-                            <div className="char__name">{item.name}</div>
+                            <img style={imgStyle} src={thumbnail} alt={name} />
+                            <div className="char__name">{name}</div>
                         </li>
                     )}
                 </Transition>
@@ -123,7 +114,7 @@ const CharList = (props) => {
         )
     }
 
-    const items = renderItems(charList)
+    const items = renderItems(charList);
     const errorMessage = error ? <ErrorMessage /> : null;
     const spinner = loading && !newItemLoading ? <Spinner /> : null;
 
