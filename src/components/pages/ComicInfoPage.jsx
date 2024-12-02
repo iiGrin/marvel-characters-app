@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 import "./comicInfoPage.scss";
 
@@ -8,6 +9,13 @@ const ComicInfoPage = ({ data }) => {
 
     return (
         <div className="comic">
+            <Helmet>
+                <meta
+                    name="description"
+                    content={`${title} comics page`}
+                />
+                <title>{title}</title>
+            </Helmet>
             <div className="comic__item">
                 <img src={thumbnail} alt={title} className="comic__img" />
                 <div className="comic__info">
