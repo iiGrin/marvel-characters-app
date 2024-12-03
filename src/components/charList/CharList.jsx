@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Transition, TransitionGroup } from 'react-transition-group';
 import PropTypes from 'prop-types';
 import Spinner from '../spinner/Spinner';
@@ -11,7 +11,7 @@ const setContent = (process, Component, newItemLoading) => { // FSM principle
         case 'waiting':
             return <Spinner />;
         case 'loading':
-            return newItemLoading ?  <Component /> : <Spinner />;
+            return newItemLoading ? <Component /> : <Spinner />;
         case 'confirmed':
             return <Component />;
         case 'error':
@@ -19,7 +19,7 @@ const setContent = (process, Component, newItemLoading) => { // FSM principle
         default:
             throw new Error('Unexpected process state');
     }
-} 
+}
 
 const CharList = (props) => {
 
@@ -128,9 +128,13 @@ const CharList = (props) => {
         )
     }
 
+    const elements = useMemo(() => {
+        return setContent(process, () => renderItems(charList), newItemLoading);
+    }, [process])
+
     return (
         <div className="char__list">
-            {setContent(process, () => renderItems(charList), newItemLoading)}
+            {elements}
             <button
                 disabled={newItemLoading}
                 style={{ 'display': charEnded ? 'none' : 'block' }}
