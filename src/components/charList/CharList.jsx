@@ -6,15 +6,29 @@ import ErrorMessage from '../errorMessage/ErrorMessage';
 import useMarvelService from '../../services/MarvelService';
 import './charList.scss';
 
+const setContent = (process, Component, newItemLoading) => { // FSM principle
+    switch (process) {
+        case 'waiting':
+            return <Spinner />;
+        case 'loading':
+            return newItemLoading ?  <Component /> : <Spinner />;
+        case 'confirmed':
+            return <Component />;
+        case 'error':
+            return <ErrorMessage />;
+        default:
+            throw new Error('Unexpected process state');
+    }
+} 
+
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
-    // const [animation, setAnimation] = useState(false);
 
-    const { loading, error, getAllCharacters } = useMarvelService(); // полученные данные вместе со spinner и гифкой ошибки
+    const { getAllCharacters, process, setProcess } = useMarvelService(); // полученные данные вместе со spinner и гифкой ошибки
 
     useEffect(() => { // эмуляция componentDidMount 
         onRequest(offset, true); // функция может запуститься выше ее объявления потому что useEffect запускается после рендера компонента
@@ -25,6 +39,7 @@ const CharList = (props) => {
         initial ? setNewItemLoading(false) : setNewItemLoading(true);
         getAllCharacters(offset) // получение данных
             .then(onCharListLoaded) // данные загружены (список объектов получен, индикатор загрузки удален)
+            .then(() => setProcess('confirmed'))
     }
 
     const onCharListLoaded = async (newCharList) => { // загрузка массива объектов
@@ -34,7 +49,6 @@ const CharList = (props) => {
         }
 
         setCharList([...charList, ...newCharList]); // новый state (массив объектов)
-        // setAnimation(true);
         setNewItemLoading(false);
         setOffset(offset + 9);
         setCharEnded(ended);
@@ -114,15 +128,9 @@ const CharList = (props) => {
         )
     }
 
-    const items = renderItems(charList);
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading && !newItemLoading ? <Spinner /> : null;
-
     return (
         <div className="char__list">
-            {errorMessage}
-            {spinner}
-            {items}
+            {setContent(process, () => renderItems(charList), newItemLoading)}
             <button
                 disabled={newItemLoading}
                 style={{ 'display': charEnded ? 'none' : 'block' }}
